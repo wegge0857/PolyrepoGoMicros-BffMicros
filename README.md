@@ -58,6 +58,9 @@ go run .\cmd\bffMicros\ -conf .\configs
 ### 请求url测试
 ##### 在数据库添加id为1的用户后，访问：
 http://localhost:8600/api/user/1
+<img width="434" height="249" alt="image" src="https://github.com/user-attachments/assets/13c934ac-1796-429f-a15a-f3f1ba8b64c3" />
+<img width="452" height="253" alt="image" src="https://github.com/user-attachments/assets/d652f911-a1d9-4911-a091-a0cf82fef5d6" />
+
 
 ### 可以用postman apifox 测试grpc，导入photo文件自动生成grpc接口
 
