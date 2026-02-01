@@ -8,7 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/wire v0.6.0
 	github.com/gorilla/handlers v1.5.2
-	github.com/wegge0857/PolyrepoGoMicros-ApiLink v0.0.0-20260119172835-21dbbbe47d80
+	github.com/wegge0857/PolyrepoGoMicros-ApiLink v0.0.1
 	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.1

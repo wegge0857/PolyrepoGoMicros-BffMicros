@@ -2,8 +2,14 @@
 # 使用 alpine 版本以减小镜像体积
 FROM golang:1.25-alpine AS builder
 
+# 1. 配置 Alpine 软件源为阿里云镜像 (加速 apk add)
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # 安装构建 Kratos 所需的工具
 RUN apk add --no-cache make git bash
+
+# 使用 goproxy.cn (由七牛云提供，非常稳定)
+ENV GOPROXY=https://goproxy.cn,direct
 
 # 设置工作目录
 WORKDIR /app
@@ -21,6 +27,9 @@ RUN make build
 
 # --- 运行阶段 (Final Stage) ---
 FROM alpine:latest
+
+# 运行阶段同样建议更换 Alpine 源，方便以后在容器内安装调试工具
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # 安装基础运行环境，包括证书和时区数据（对微服务很重要）
 RUN apk add --no-cache ca-certificates tzdata && \
