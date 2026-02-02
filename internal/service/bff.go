@@ -3,7 +3,10 @@ package service
 import (
 	"bffMicros/internal/conf"
 	"context"
-	"log"
+	"fmt"
+	"os"
+
+	"github.com/go-kratos/kratos/v2/log"
 
 	"github.com/dtm-labs/client/dtmgrpc"
 	"github.com/go-redis/redis/v8"
@@ -17,13 +20,16 @@ import (
 	userV1 "github.com/wegge0857/PolyrepoGoMicros-ApiLink/user/v1"
 )
 
-const (
-	etfGrpcAddr  = "127.0.0.1:9601"
-	userGrpcAddr = "127.0.0.1:9602"
+// const (
+// 	etfGrpcAddr  = "127.0.0.1:9601"
+// 	userGrpcAddr = "127.0.0.1:9602"
 
-	etfServiceAddr  = etfGrpcAddr + "/api.etf.v1.Etf"
-	userServiceAddr = userGrpcAddr + "/api.user.v1.User"
-)
+// )
+
+// const (
+// 	etfServiceAddr  = "/api.etf.v1.Etf"
+// 	userServiceAddr = "/api.user.v1.User"
+// )
 
 // 确保 BffService 实现了接口
 var _ bffV1.BffServer = (*BffService)(nil)
@@ -34,7 +40,9 @@ type BffService struct {
 	userClient userV1.UserClient
 	etfClient  etfV1.EtfClient
 
-	rdb *redis.Client // 注入 Redis 客户端
+	rdb          *redis.Client // 注入 Redis 客户端
+	userGrpcAddr string
+	etfGrpcAddr  string
 }
 
 // 1. 定义一个独立的 Redis Provider
@@ -47,10 +55,29 @@ func NewRedis(c *conf.Data) *redis.Client {
 	return rdb
 }
 
+func getAddr(remote, local string) string {
+	// 简单逻辑：如果环境变量发现是在 K3s 运行，就用 service 名
+	// 否则用 127.0.0.1
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		return remote
+	}
+	return local
+}
+
+// 获取本地或者k3s的配置地址
+func userGrpcAddr(c *conf.Server) string {
+	return getAddr(c.Grpc.GetUserAddr(), c.Grpc.GetLocalUserAddr())
+}
+
+// 获取本地或者k3s的配置地址
+func etfGrpcAddr(c *conf.Server) string {
+	return getAddr(c.Grpc.GetEtfAddr(), c.Grpc.GetLocalEtfAddr())
+}
+
 //返回bffV1.BffServer
 //符合 gRPC 生成代码的规范
 //隐藏内部实现细节（封装）
-func NewBffService() bffV1.BffServer { //ProviderSet
+func NewBffService(c *conf.Server) bffV1.BffServer { //ProviderSet
 	// 测试连接
 	// _, err := rdb.Ping(context.Background()).Result()
 	// if err != nil {
@@ -58,6 +85,11 @@ func NewBffService() bffV1.BffServer { //ProviderSet
 	// }
 	// log.Fatalln("redis connected successfully")
 
+	userGrpcAddr := userGrpcAddr(c)
+	etfGrpcAddr := etfGrpcAddr(c)
+
+	fmt.Printf("当前user-grpc地址: %s\n", userGrpcAddr)
+	fmt.Printf("当前etf-grpc地址: %s\n", etfGrpcAddr)
 	// 建立连接
 	connUser, err := grpc.NewClient(
 		userGrpcAddr,
@@ -80,8 +112,10 @@ func NewBffService() bffV1.BffServer { //ProviderSet
 	return &BffService{
 		// rdb: rdb,
 		// 注入其他子服务的 grpc client (如 User, Etf)
-		userClient: userV1.NewUserClient(connUser),
-		etfClient:  etfV1.NewEtfClient(connEtf),
+		userClient:   userV1.NewUserClient(connUser),
+		etfClient:    etfV1.NewEtfClient(connEtf),
+		userGrpcAddr: userGrpcAddr,
+		etfGrpcAddr:  etfGrpcAddr,
 	}
 }
 
@@ -118,7 +152,18 @@ go get github.com/dtm-labs/client
 防止重复点击 还需要 在 BFF 层做业务幂等控制，如业务唯一键；或者使用 数据库唯一索引 等。
 */
 func (s *BffService) UpdateStar(ctx context.Context, req *bffV1.BffUpdateStarRequest) (*bffV1.BffUpdateStarReply, error) {
+
+	// 1. 获取动态地址
+	userAddr := s.userGrpcAddr
+	etfAddr := s.etfGrpcAddr
+
+	// 2. 拼接 DTM 需要的完整全称
+	// 注意：开头的 "/" 必须保留，或者根据 DTM 版本要求使用 "服务地址/包名.服务名/方法名"
+	uServicePath := userAddr + "/api.user.v1.User"
+	eServicePath := etfAddr + "/api.etf.v1.Etf"
+
 	// 1. DTM 服务器地址
+	// @TODO 在服务器上如何配置
 	dtmServer := "localhost:36790"
 
 	// 2. 生成一个全局事务 ID
@@ -127,14 +172,14 @@ func (s *BffService) UpdateStar(ctx context.Context, req *bffV1.BffUpdateStarReq
 	// 3. 创建 SAGA 事务
 	saga := dtmgrpc.NewSagaGrpc(dtmServer, gid).
 		Add( // 第一步：调用 ETF 服务增加星数，补偿操作是减少星数
-			etfServiceAddr+"/UpdateStar",
-			etfServiceAddr+"/UpdateStar", //补偿 在EtfService业务中 判断 dtmimp.OpCompensate dtmimp.OpRollback。或者就区分方法
+			eServicePath+"/UpdateStar",
+			eServicePath+"/UpdateStar", //补偿 在EtfService业务中 判断 dtmimp.OpCompensate dtmimp.OpRollback。或者就区分方法
 			&etfV1.UpdateStarRequest{Id: req.Param.Id, Kind: "+"},
 		).
 		Add( // 第二步：调用用户记录服务增加记录，补偿操作是删除该记录
-			userServiceAddr+"/UserStarRecord",
-			userServiceAddr+"/UserStarRecord",                                        //补偿同上
-			&userV1.UserStarRecordRequest{UserId: 1, EtfId: req.Param.Id, Kind: "+"}, //@Todo UserId到时候直接在jwt中获取
+			uServicePath+"/UserStarRecord",
+			uServicePath+"/UserStarRecord",                                           //补偿同上
+			&userV1.UserStarRecordRequest{UserId: 2, EtfId: req.Param.Id, Kind: "+"}, //@Todo UserId到时候直接在jwt中获取
 		)
 
 	// 4. 提交并执行事务。 SAGA 是异步编排，请求发起者是 DTM Server，不能使用userClient等

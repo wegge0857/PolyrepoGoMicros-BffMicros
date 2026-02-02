@@ -5,6 +5,10 @@ server:
   grpc:
     addr: 0.0.0.0:9603
     timeout: 1s
+    etf_addr: "etf-service:9601"
+    user_addr: "user-service:9602"
+    local_etf_addr: "127.0.0.1:9601"
+    local_user_addr: "127.0.0.1:9602"
 data:
   database:
     driver: mysql

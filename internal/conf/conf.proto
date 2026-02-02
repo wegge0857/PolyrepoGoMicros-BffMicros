@@ -20,6 +20,10 @@ message Server {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
+    string etf_addr = 4;    // 新增
+    string user_addr = 5;   // 新增
+    string local_etf_addr = 6;    // 新增
+    string local_user_addr = 7;   // 新增
   }
   HTTP http = 1;
   GRPC grpc = 2;

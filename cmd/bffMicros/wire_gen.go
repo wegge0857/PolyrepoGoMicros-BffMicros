@@ -22,7 +22,7 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	bffServer := service.NewBffService()
+	bffServer := service.NewBffService(confServer)
 	client := service.NewRedis(data)
 	grpcServer := server.NewGRPCServer(confServer, bffServer, client, logger)
 	httpServer := server.NewHTTPServer(confServer, bffServer, client, logger)
