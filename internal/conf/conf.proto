@@ -24,6 +24,8 @@ message Server {
     string user_addr = 5;   // 新增
     string local_etf_addr = 6;    // 新增
     string local_user_addr = 7;   // 新增
+    string dtm_addr = 8;   // 新增
+    string local_dtm_addr = 9;   // 新增
   }
   HTTP http = 1;
   GRPC grpc = 2;

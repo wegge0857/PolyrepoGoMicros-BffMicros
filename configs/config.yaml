@@ -7,8 +7,10 @@ server:
     timeout: 1s
     etf_addr: "etf-service:9601"
     user_addr: "user-service:9602"
+    dtm_addr: "dtm-service:36790"
     local_etf_addr: "127.0.0.1:9601"
     local_user_addr: "127.0.0.1:9602"
+    local_dtm_addr: "127.0.0.1:36790"
 data:
   database:
     driver: mysql

@@ -247,6 +247,8 @@ type Server_GRPC struct {
 	UserAddr      string                 `protobuf:"bytes,5,opt,name=user_addr,json=userAddr,proto3" json:"user_addr,omitempty"`                  // 新增
 	LocalEtfAddr  string                 `protobuf:"bytes,6,opt,name=local_etf_addr,json=localEtfAddr,proto3" json:"local_etf_addr,omitempty"`    // 新增
 	LocalUserAddr string                 `protobuf:"bytes,7,opt,name=local_user_addr,json=localUserAddr,proto3" json:"local_user_addr,omitempty"` // 新增
+	DtmAddr       string                 `protobuf:"bytes,8,opt,name=dtm_addr,json=dtmAddr,proto3" json:"dtm_addr,omitempty"`                     // 新增
+	LocalDtmAddr  string                 `protobuf:"bytes,9,opt,name=local_dtm_addr,json=localDtmAddr,proto3" json:"local_dtm_addr,omitempty"`    // 新增
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -326,6 +328,20 @@ func (x *Server_GRPC) GetLocalEtfAddr() string {
 func (x *Server_GRPC) GetLocalUserAddr() string {
 	if x != nil {
 		return x.LocalUserAddr
+	}
+	return ""
+}
+
+func (x *Server_GRPC) GetDtmAddr() string {
+	if x != nil {
+		return x.DtmAddr
+	}
+	return ""
+}
+
+func (x *Server_GRPC) GetLocalDtmAddr() string {
+	if x != nil {
+		return x.LocalDtmAddr
 	}
 	return ""
 }
@@ -466,14 +482,14 @@ const file_internal_conf_conf_proto_rawDesc = "" +
 	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"]\n" +
 	"\tBootstrap\x12*\n" +
 	"\x06server\x18\x01 \x01(\v2\x12.kratos.api.ServerR\x06server\x12$\n" +
-	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\"\xbf\x03\n" +
+	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\"\x80\x04\n" +
 	"\x06Server\x12+\n" +
 	"\x04http\x18\x01 \x01(\v2\x17.kratos.api.Server.HTTPR\x04http\x12+\n" +
 	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x1ai\n" +
 	"\x04HTTP\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x1a\xef\x01\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x1a\xb0\x02\n" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
@@ -481,7 +497,9 @@ const file_internal_conf_conf_proto_rawDesc = "" +
 	"\betf_addr\x18\x04 \x01(\tR\aetfAddr\x12\x1b\n" +
 	"\tuser_addr\x18\x05 \x01(\tR\buserAddr\x12$\n" +
 	"\x0elocal_etf_addr\x18\x06 \x01(\tR\flocalEtfAddr\x12&\n" +
-	"\x0flocal_user_addr\x18\a \x01(\tR\rlocalUserAddr\"\xf9\x02\n" +
+	"\x0flocal_user_addr\x18\a \x01(\tR\rlocalUserAddr\x12\x19\n" +
+	"\bdtm_addr\x18\b \x01(\tR\adtmAddr\x12$\n" +
+	"\x0elocal_dtm_addr\x18\t \x01(\tR\flocalDtmAddr\"\xf9\x02\n" +
 	"\x04Data\x125\n" +
 	"\bdatabase\x18\x01 \x01(\v2\x19.kratos.api.Data.DatabaseR\bdatabase\x12,\n" +
 	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x1a:\n" +

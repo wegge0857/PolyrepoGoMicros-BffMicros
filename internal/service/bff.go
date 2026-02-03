@@ -43,6 +43,7 @@ type BffService struct {
 	rdb          *redis.Client // 注入 Redis 客户端
 	userGrpcAddr string
 	etfGrpcAddr  string
+	dtmAddr      string
 }
 
 // 1. 定义一个独立的 Redis Provider
@@ -74,6 +75,9 @@ func userGrpcAddr(c *conf.Server) string {
 func etfGrpcAddr(c *conf.Server) string {
 	return getAddr(c.Grpc.GetEtfAddr(), c.Grpc.GetLocalEtfAddr())
 }
+func dtmAddr(c *conf.Server) string {
+	return getAddr(c.Grpc.GetDtmAddr(), c.Grpc.GetLocalDtmAddr())
+}
 
 //返回bffV1.BffServer
 //符合 gRPC 生成代码的规范
@@ -88,6 +92,7 @@ func NewBffService(c *conf.Server) bffV1.BffServer { //ProviderSet
 
 	userGrpcAddr := userGrpcAddr(c)
 	etfGrpcAddr := etfGrpcAddr(c)
+	dtmAddr := dtmAddr(c)
 
 	fmt.Printf("当前user-grpc地址: %s\n", userGrpcAddr)
 	fmt.Printf("当前etf-grpc地址: %s\n", etfGrpcAddr)
@@ -117,6 +122,7 @@ func NewBffService(c *conf.Server) bffV1.BffServer { //ProviderSet
 		etfClient:    etfV1.NewEtfClient(connEtf),
 		userGrpcAddr: userGrpcAddr,
 		etfGrpcAddr:  etfGrpcAddr,
+		dtmAddr:      dtmAddr,
 	}
 }
 
@@ -157,6 +163,7 @@ func (s *BffService) UpdateStar(ctx context.Context, req *bffV1.BffUpdateStarReq
 	// 1. 获取动态地址
 	userAddr := s.userGrpcAddr
 	etfAddr := s.etfGrpcAddr
+	dtmAddr := s.dtmAddr
 
 	// 2. 拼接 DTM 需要的完整全称
 	// 注意：开头的 "/" 必须保留，或者根据 DTM 版本要求使用 "服务地址/包名.服务名/方法名"
@@ -165,7 +172,7 @@ func (s *BffService) UpdateStar(ctx context.Context, req *bffV1.BffUpdateStarReq
 
 	// 1. DTM 服务器地址
 	// @TODO 在服务器上如何配置
-	dtmServer := "localhost:36790"
+	dtmServer := dtmAddr
 
 	// 2. 生成一个全局事务 ID
 	gid := dtmgrpc.MustGenGid(dtmServer)
