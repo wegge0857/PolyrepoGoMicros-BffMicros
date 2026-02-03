@@ -72,8 +72,8 @@ kratos proto client .
 
 ### k3s部署命令集合
 ```bash
-docker build -t bff-micros:v0.0.1 . #在对应的微服务下生成镜像
-docker save -o bff-micros-v0.0.1.tar bff-micros:v0.0.2 #生成镜像文件
+docker build -t bff-micros:v0.0.2 . #在对应的微服务下生成镜像
+docker save -o bff-micros-v0.0.2.tar bff-micros:v0.0.2 #生成镜像文件
 sudo k3s ctr images import bff-micros-v0.0.2.tar #导入镜像
 kubectl delete -f micros-all.yaml #清除pod
 kubectl apply -f micros-all.yaml  #启动新的pod
