@@ -96,6 +96,7 @@ func NewBffService(c *conf.Server) bffV1.BffServer { //ProviderSet
 
 	fmt.Printf("当前user-grpc地址: %s\n", userGrpcAddr)
 	fmt.Printf("当前etf-grpc地址: %s\n", etfGrpcAddr)
+	fmt.Printf("当前dtm地址: %s\n", dtmAddr)
 	// 建立连接
 	connUser, err := grpc.NewClient(
 		userGrpcAddr,
