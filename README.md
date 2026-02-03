@@ -69,3 +69,14 @@ http://localhost:8603/api/user/1
 ```bash
 kratos proto client .
 ```
+
+### k3s部署命令集合
+```bash
+docker build -t bff-micros:v0.0.1 . #在对应的微服务下生成镜像
+docker save -o bff-micros-v0.0.1.tar bff-micros:v0.0.2 #生成镜像文件
+sudo k3s ctr images import bff-micros-v0.0.2.tar #导入镜像
+kubectl delete -f micros-all.yaml #清除pod
+kubectl apply -f micros-all.yaml  #启动新的pod
+kubectl get pods #查询当前pod
+kubectl logs bff-micros-59f5d5489d-rw4m6 #查看微服务代码内部
+```
