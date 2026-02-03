@@ -65,6 +65,8 @@ http://localhost:8603/api/user/1
 
 ### 测试grpc
 ###### 可以用postman apifox 测试grpc，导入photo文件自动生成grpc接口
+<img width="1044" height="676" alt="image" src="https://github.com/user-attachments/assets/86136df2-3742-4e99-aa9e-532e5cff49e9" />
+
 
 ### 更新proto文件
 ```bash
