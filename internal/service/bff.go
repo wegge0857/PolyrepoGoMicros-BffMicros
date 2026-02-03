@@ -49,6 +49,7 @@ type BffService struct {
 func NewRedis(c *conf.Data) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:         c.Redis.Addr,
+		Password:     c.Redis.Password,
 		ReadTimeout:  c.Redis.ReadTimeout.AsDuration(),
 		WriteTimeout: c.Redis.WriteTimeout.AsDuration(),
 	})
