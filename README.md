@@ -72,11 +72,18 @@ kratos proto client .
 
 ### k3s部署命令集合
 ```bash
-docker build -t bff-micros:v0.0.2 . #在对应的微服务下生成镜像
+# 启动
+docker build -t bff-micros:v0.0.2 . #在 bff 项目下生成镜像
 docker save -o bff-micros-v0.0.2.tar bff-micros:v0.0.2 #生成镜像文件
 sudo k3s ctr images import bff-micros-v0.0.2.tar #导入镜像
 kubectl delete -f micros-all.yaml #清除pod
 kubectl apply -f micros-all.yaml  #启动新的pod
 kubectl get pods #查询当前pod
 kubectl logs bff-micros-59f5d5489d-rw4m6 #查看微服务代码内部
+
+# 维护
+kubectl delete configmap bff-config # 在 bff 项目目录下，删除删除configmap
+kubectl create configmap bff-config --from-file=configs/config.yaml # 生成最新configmap
+kubectl exec -it bff-micros-xxx -- cat /app/configs/config.yaml #查看内部是否为最新文件
+kubectl exec -it bff-micros-d49dfc78c-5zvrw -- nc -zv dtm-service 36790 # 查看容器内部 能不能 打通某个服务
 ```
